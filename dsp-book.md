@@ -129,5 +129,28 @@ with{
 process = os.sawtooth(freq)*envelope;	
 ```
 <!-- /faust-run -->	
+
+## Distortion
+
+<!-- faust-run -->
+```
+import("stdfaust.lib");
+
+cubicnl(drive,offset) = *(pregain) : +(offset) : clip(-1,1) : cubic
+with {
+  pregain = pow(10.0,2*drive);
+  clip(lo,hi) = min(hi) : max(lo);
+  cubic(x) = x - x*x*x/3;
+};
+
+drive = hslider("[0]Drive[style:knob]",0.5,0,1,0.01);
+offset = hslider("[1]Offset[style:knob]",0,-1,1,0.01);
+
+process = hgroup("Distortion",cubicnl(drive,offset));
+```
+<!-- /faust-run -->				
+
+We could improve this by adding a DC blocker too.
 			
+      
       

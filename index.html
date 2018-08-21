@@ -26,6 +26,7 @@
 <li><a href="#adsr-envelope">ADSR Envelope</a></li>
 <li><a href="#decaying-exponential">Decaying Exponential</a></li>
 <li><a href="#adsr-with-exponential-segments">ADSR With Exponential Segments</a></li>
+<li><a href="#distortion">Distortion</a></li>
 </ul></li>
 </ul>
 </div>
@@ -124,7 +125,24 @@ with{
 };
 
 process = os.sawtooth(freq)*envelope;   </code></pre>
-<a href="http://faust.grame.fr/editor?code=img/src/exfaust3/exfaust3.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div></div></div></div></main>
+<a href="http://faust.grame.fr/editor?code=img/src/exfaust3/exfaust3.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<h2 id="distortion">Distortion</h2>
+<div class="faust-run"><a href="img/src/exfaust4/exfaust4-svg/process.svg" target="_blank"><img src="img/src/exfaust4/exfaust4-svg/process.svg" class="mx-auto d-block"></a>
+<pre><code>import(&quot;stdfaust.lib&quot;);
+
+cubicnl(drive,offset) = *(pregain) : +(offset) : clip(-1,1) : cubic
+with {
+  pregain = pow(10.0,2*drive);
+  clip(lo,hi) = min(hi) : max(lo);
+  cubic(x) = x - x*x*x/3;
+};
+
+drive = hslider(&quot;[0]Drive[style:knob]&quot;,0.5,0,1,0.01);
+offset = hslider(&quot;[1]Offset[style:knob]&quot;,0,-1,1,0.01);
+
+process = hgroup(&quot;Distortion&quot;,cubicnl(drive,offset));</code></pre>
+<a href="http://faust.grame.fr/editor?code=img/src/exfaust4/exfaust4.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<p>We could improve this by adding a DC blocker too.</p></div></div></div></main>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
