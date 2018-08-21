@@ -151,6 +151,42 @@ process = hgroup("Distortion",cubicnl(drive,offset));
 <!-- /faust-run -->				
 
 We could improve this by adding a DC blocker too.
+
+## Compressor
+
+TODO: this one hasn't been tested but it seems to work. We should talk about 
+how deep we wanna go in terms of not using pre-written functions. All in all,
+it seems that we can't just through Faust examples at student's face: it needs
+to be contextualized and build up progressively.
+
+<!-- faust-run -->
+```
+import("stdfaust.lib");
+
+compressor(ratio,thresh,att,rel,kneeAtt,gain) = _ <: _*(ampFollower(att,rel) : 
+  ba.linear2db : outminusindb : kneesmooth : visualizer : ba.db2linear)*gain 
+with{
+  normOnePole(p,x) = x * (1.0 - p) : (+ : max(x,_)) ~ *(p);
+  attPole = ba.tau2pole(att);
+  relPole = ba.tau2pole(rel);
+  kneePole = ba.tau2pole(kneeAtt);
+  ampFollower(att,rel) = abs : normOnePole(attPole) : normOnePole(relPole);
+  outminusindb(level) = max(level-thresh,0)*(1/ratio-1);
+  kneesmooth = normOnePole(kneePole);
+  visualizer = hbargraph("[1]Compressor Level [unit:dB]",-50,10);
+};
+
+envelopesGroup(x) = hgroup("[0]Envelope",x);
+att = envelopesGroup(hslider("[0]Attack [style:knob][unit:ms]",20,0,500,0.1)*0.001);
+rel = envelopesGroup(hslider("[1]Release [style:knob][unit:ms]",20,0,500,0.1)*0.001);
+kneeAtt = envelopesGroup(hslider("[2]Knee Attack [style:knob][unit:ms]",10,0,250,0.1)*0.001);
+thresh = hslider("[2]Threshold [unit:dB]",-30,-60,4,0.1);
+ratio = hslider("[3]Ratio",1,1,10,0.01);
+makeUpGain = hslider("[4]Makeup Gain [unit:dB]",40,-96,96,0.1) : ba.db2linear;
+
+process = vgroup("Compressor",compressor(ratio,thresh,att,rel,kneeAtt,makeUpGain));
+```
+<!-- /faust-run -->				
 			
       
       
