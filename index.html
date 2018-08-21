@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    
+    <link href="css/faust-doc.css" rel="stylesheet">
+    <link href="css/faust-widget.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+
+    <title>Faust Manual</title>
+  </head>
+  <body><div class="container-fluid"><div class="row faust-doc"><nav id="TOC" class="col-3 faust-doc-content"><div style="height: 100%;overflow-y: scroll;"><ul class="nav flex-column"><ul>
+<li><a href="#chapter">Chapter</a><ul>
+<li><a href="#section">Section</a><ul>
+<li><a href="#subsection">Subsection</a></li>
+</ul></li>
+<li><a href="#the-next-section">The Next Section</a></li>
+</ul></li>
+</ul>
+</div>
+</nav>
+<main role="main" class="col-9 ml-sm-auto px-4 faust-doc-content">
+<div data-spy="scroll" data-target="#TOC" data-offset="0" style="height: 100%;overflow-y: scroll;">
+<h1 id="chapter">Chapter</h1>
+<h2 id="section">Section</h2>
+<h3 id="subsection">Subsection</h3>
+<p>Regular code example:</p>
+<pre><code>y = x;</code></pre>
+<p>Inlined code example: <code>y = x;</code>.</p>
+<p>Compilable Faust code example:</p>
+<div class="faust-run"><a href="img/src/exfaust0/exfaust0-svg/process.svg" target="_blank"><img src="img/src/exfaust0/exfaust0-svg/process.svg" class="mx-auto d-block"></a>
+<pre><code>process = _~+(1);</code></pre>
+<a href="http://faust.grame.fr/editor?code=img/src/exfaust0/exfaust0.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<p>and its corresponding differential equation:</p>
+<p><span class="math display">\[y(n) = y(n-1) + 1\]</span></p>
+<p>That could also be inlined: <span class="math inline">\(y(n) = y(n-1) + 1\)</span>.</p>
+<p>Example of a figure:</p>
+<p><img src="img/diagiteration.svg" class="mx-auto d-block"></p>
+<p>Link to <a href="#the-next-section">the next section</a>.</p>
+<h2 id="the-next-section">The Next Section</h2></div></div></div></main>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  </body>
+</html>
