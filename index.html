@@ -15,11 +15,16 @@
     <title>Faust Manual</title>
   </head>
   <body><div class="container-fluid"><div class="row faust-doc"><nav id="TOC" class="col-3 faust-doc-content"><div style="height: 100%;overflow-y: scroll;"><ul class="nav flex-column"><ul>
-<li><a href="#chapter">Chapter</a><ul>
-<li><a href="#section">Section</a><ul>
-<li><a href="#subsection">Subsection</a></li>
+<li><a href="#chapter-3-modulation-synthesis">Chapter 3: Modulation Synthesis</a><ul>
+<li><a href="#ring-modulation">Ring modulation</a><ul>
+<li><a href="#tremolo-effect">Tremolo Effect</a></li>
 </ul></li>
-<li><a href="#the-next-section">The Next Section</a></li>
+<li><a href="#amplitude-modulation">Amplitude Modulation</a></li>
+<li><a href="#frequency-modulation">Frequency Modulation</a><ul>
+<li><a href="#bandwidth">Bandwidth</a></li>
+<li><a href="#the-cm-ratio">The C:M Ratio</a></li>
+</ul></li>
+<li><a href="#musical-examples">Musical examples</a></li>
 </ul></li>
 <li><a href="#faust-codes">Faust Codes</a><ul>
 <li><a href="#additive-synthesizer">Additive Synthesizer</a></li>
@@ -29,31 +34,127 @@
 <li><a href="#distortion">Distortion</a></li>
 <li><a href="#compressor">Compressor</a></li>
 </ul></li>
+<li><a href="#references">References</a></li>
 </ul>
 </div>
 </nav>
 <main role="main" class="col-9 ml-sm-auto px-4 faust-doc-content">
 <div data-spy="scroll" data-target="#TOC" data-offset="0" style="height: 100%;overflow-y: scroll;">
-<h1 id="chapter">Chapter</h1>
-<h2 id="section">Section</h2>
-<h3 id="subsection">Subsection</h3>
-<p>Regular code example:</p>
-<pre><code>y = x;</code></pre>
-<p>Inlined code example: <code>y = x;</code>.</p>
-<p>Compilable Faust code example:</p>
+<h1 id="chapter-3-modulation-synthesis">Chapter 3: Modulation Synthesis</h1>
+<p>In this Chapter we will explain some classic modulation techniques. Modulation is the alteration of the amplitude, frequency and /or phase of an oscillator in accordance with another signal. The original oscillator is called the carrier signal, while the modulating signal is called the modulator signal. In this Chapter we will examine three forms of modulations: Ring Modulation (RM), Amplitude Modulation (AM), and Frequency Modulation (FM).</p>
+<h2 id="ring-modulation">Ring modulation</h2>
+<p>Ring modulation is simply the multiplication of two signals. Ring modulation has been extensively used by the German composer <a href="TODO">Karlheinz Stockhausen</a>. It has also been used in the implementation of the first movie completely designed with electronic sounds: <a href="TODO">Forbidden Planet</a> (1956). Ring modulation has also been used extensively in video games. As an example, the sound chip of <a href="TODO">Commodore 64</a> had ring modulation implemented, which was used in sound effects for several games. <!-- RM: that's a lot of "been used..." --></p>
+<p>The algorithm of ring modulation can be summarized as follows:</p>
+<p>TODO: insert ring mod diagram here</p>
+<p>In order to understand what happens to the spectrum of a sound when we multiply two signals, let’s consider the simple case of multiplying two cosinewaves:</p>
+<p><span class="math display">\[y(t) = \cos(\omega_1 t) \cos (\omega_2 t)\]</span></p>
+<!-- Why cosine and not sine? -->
+<p>where <span class="math inline">\(\omega_1\)</span> and <span class="math inline">\(\omega_2\)</span> represent the frequencies of two sinewaves.</p>
+<p>Using trigonometric identities, the following equation holds:</p>
+<p><span class="math display">\[y(t) = \cos(\omega_1 t) \cos (\omega_2 t) = \frac {1}{2}[ \cos((\omega_1-\omega_1)  t)) +  \cos((\omega_1+ \omega_1)  t))\]</span></p>
+<p>As an example, if we consider two cosinewaves whose frequencies are <span class="math inline">\(\omega_1 = 300\)</span> Hz and <span class="math inline">\(\omega_2 = 100\)</span> Hz respectively, multiplying them provides the sum of two sinewaves whose frequencies are 200 Hz and 400 Hz respectively, and whose amplitude is the half of the original amplitude.</p>
+<!-- RM: respectively... Also, can we really say that w1 and w2 are frequencies
+in Hz while they're supposed to be radian frequencies? -->
+<p>A Faust implementation of the previous equation could be:</p>
 <div class="faust-run"><a href="img/src/exfaust0/exfaust0-svg/process.svg" target="_blank"><img src="img/src/exfaust0/exfaust0-svg/process.svg" class="mx-auto d-block"></a>
-<pre><code>process = _~+(1);</code></pre>
-<a href="http://faust.grame.fr/editor?code=img/src/exfaust0/exfaust0.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
-<p>and its corresponding differential equation:</p>
-<p><span class="math display">\[y(n) = y(n-1) + 1\]</span></p>
-<p>That could also be inlined: <span class="math inline">\(y(n) = y(n-1) + 1\)</span>.</p>
-<p>Example of a figure:</p>
-<p><img src="img/diagiteration.svg" class="mx-auto d-block"></p>
-<p>Link to <a href="#the-next-section">the next section</a>.</p>
-<h2 id="the-next-section">The Next Section</h2>
+<pre><code>import(&quot;stdfaust.lib&quot;);
+f1 = hslider(&quot;f1&quot;,300,20,1000,0.1);
+f2 = hslider(&quot;f2&quot;,100,20,1000,0.1);
+process = os.osc(f1)*os.osc(f2);</code></pre>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust0/exfaust0.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<p>Note that the modulation could be applied to an input signal simply by making the following modification:</p>
+<div class="faust-run"><a href="img/src/exfaust1/exfaust1-svg/process.svg" target="_blank"><img src="img/src/exfaust1/exfaust1-svg/process.svg" class="mx-auto d-block"></a>
+<pre><code>import(&quot;stdfaust.lib&quot;);
+modFreq = hslider(&quot;Modulation Frequency&quot;,300,20,1000,0.1);
+process = *(os.osc(modFreq));</code></pre>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust1/exfaust1.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<h3 id="tremolo-effect">Tremolo Effect</h3>
+<p>Tremolo is defined as the variation of the amplitude of a signal. A tremolo effect can be obtained with a ring modulator, but having the frequency of the modulator signal below 20 Hz.</p>
+<p>A Faust implementation of a simple tremolo effect could be:</p>
+<div class="faust-run"><a href="img/src/exfaust2/exfaust2-svg/process.svg" target="_blank"><img src="img/src/exfaust2/exfaust2-svg/process.svg" class="mx-auto d-block"></a>
+<pre><code>import(&quot;stdfaust.lib&quot;);
+modFreq = hslider(&quot;Modulation Frequency&quot;,8,0.001,20,0.1);
+process = *(os.osc(modFreq));</code></pre>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust2/exfaust2.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<!-- RM: do we want to do some scaling on the signal of the sine oscillator to
+prevent the phase inversion? If yes, should we comment that in the body of the
+text and add some math? -->
+<h2 id="amplitude-modulation">Amplitude Modulation</h2>
+<p>In the ring modulation equation the frequency of the carrier signal is not present anymore in the resulting sound. In order to avoid this, the ring modulation equation can be modified. Amplitude modulation is mathematically expressed as:</p>
+<p><span class="math display">\[y(t) = \cos(\omega_1 t) (\cos (\omega_2 t)+1)\]</span></p>
+<p>Using again trigonometric identities, the result of such multiplication becomes:</p>
+<p><span class="math display">\[y(t) =  \frac {1}{2}[ \cos((\omega_1-\omega_1)  t)) +  \cos((\omega_1+ \omega_1)  t)) + \cos(\omega_1 t) \]</span></p>
+<p>The corresponding Faust implementation could be:</p>
+<div class="faust-run"><a href="img/src/exfaust3/exfaust3-svg/process.svg" target="_blank"><img src="img/src/exfaust3/exfaust3-svg/process.svg" class="mx-auto d-block"></a>
+<pre><code>import(&quot;stdfaust.lib&quot;);
+f1 = hslider(&quot;f1&quot;,300,20,1000,0.1);
+f2 = hslider(&quot;f2&quot;,100,20,1000,0.1);
+process = os.osc(f1)*(os.osc(f2)+1)*0.5;</code></pre>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust3/exfaust3.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<p>Note that the whole process must be multiplied by 0.5 here to restrain the range of the generated signal between -1 and 1 to prevent clicking.</p>
+<h2 id="frequency-modulation">Frequency Modulation</h2>
+<p>Frequency modulation (FM) is a synthesis technique <a href="#chowning-fm">invented by John Chowning</a> at Stanford University in California.</p>
+<p>The FM patent was licensed from Stanford University to Yamaha, and allowed the creation of the <a href="TODO">DX7</a>, the most successful synthesizer in history. FM synthesis was the most popular synthesis techniques in the 80s, especially for its ability to create several complex sounds with very little computational power.</p>
+<p>The main idea behind frequency modulation is the fact that the frequency of a carrier oscillator can be modulated by another oscillator. Mathematically speaking, given two cosine waves:</p>
+<p><span class="math display">\[
+y_1(t) = a_1 \cos(\omega_1 t) \\
+y_2(t) = a_2 \cos(\omega_2 t)
+\]</span></p>
+<p>FM can be expressed as:</p>
+<p><span class="math display">\[y = \cos((\omega_1 + a_2 cos (\omega_2 t)) t)\]</span></p>
+<!-- RM: where did a1 go? -->
+<p>The corresponding Faust implementation could look like:</p>
+<div class="faust-run"><a href="img/src/exfaust4/exfaust4-svg/process.svg" target="_blank"><img src="img/src/exfaust4/exfaust4-svg/process.svg" class="mx-auto d-block"></a>
+<pre><code>import(&quot;stdfaust.lib&quot;);
+f1 = hslider(&quot;[0]f1&quot;,300,20,1000,0.1);
+a1 = hslider(&quot;[1]a1&quot;,1,0,1,0.01);
+f2 = hslider(&quot;[2]f2&quot;,100,20,1000,0.1);
+a2 = hslider(&quot;[3]a2&quot;,1,0,100,0.01);
+process = a1*os.osc(f1 + a2*os.osc(f2));</code></pre>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust4/exfaust4.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<p>This equation therefore represents a cosine wave whose frequency is modulated by another cosine wave. The result is a very complex spectrum able to generate not only a few sidebands like amplitude and ring modulation, but an infinite number of sidebands.</p>
+<!-- RM: I don't think we mentioned the concept of sidebands in the AM section,
+I think we should. -->
+<p>More precisely, John Chowning discovered that with frequency modulation it is possible to produce sidebands given by the following equation:</p>
+<p><span class="math display">\[
+\omega_s = \omega_c \pm n \omega_n
+\]</span></p>
+<p>where <span class="math inline">\(n\)</span> is an integer, <span class="math inline">\(\omega_c\)</span> is the carrier’s frequency and <span class="math inline">\(\omega_m\)</span> is the modulation frequency.</p>
+<!-- wm or wn? ;) -->
+<p>This equation simply expresses the fact that each sideband lies at a frequency which is equal to the carrier frequency plus or minus an integer multiple of the modulator frequency.</p>
+<p>In theory, since <span class="math inline">\(n\)</span> can take any integer value, applying frequency modulation produces an infinite series of sidebands. In practice this is not the case, as we will see later.</p>
+<p>The calculation of the amplitude of sidebands is a quite complex task. We need to introduce a new term named <span class="math inline">\(\beta\)</span>, known as the modulation index. In the frequency modulation equation, <span class="math inline">\(\beta\)</span> represents <span class="math inline">\(a_2\)</span>, the amplitude of the modulator. <span class="math inline">\(\beta\)</span> is defined as:</p>
+<p><span class="math display">\[
+\beta = \frac {\Delta \omega_c}{\omega_n}
+\]</span></p>
+<p>where <span class="math inline">\(\Delta \omega_c\)</span> is the variation of the carrier frequency (the amount of variations of the carrier frequency from its unmodulated frequency).</p>
+<h3 id="bandwidth">Bandwidth</h3>
+<p>The bandwidth of a signal can be defined as the range of frequencies occupied by a given signal. For example, a signal composed by two sinusoids, one at 100 Hz and one at 200 Hz has a bandwidth of 100 Hz. On the other hand, a signal composed by the sum of two sinusoids, one at frequency 100 Hz and another at frequency 400 Hz has a bandwidth of 300 Hz.</p>
+<p><strong>Exercise:</strong> Two cosine waves at frequencies 300 Hz and 500 Hz are ring-modulated. What is the bandwidth of the resulting signal? For frequency modulation, there is a rule of thumb which states the following:</p>
+<p><span class="math display">\[ B = 2 \omega_m 1 + \beta \]</span></p>
+<h3 id="the-cm-ratio">The C:M Ratio</h3>
+<p>The C:M ratio expresses the relative frequencies of carrier and modulator signal. An an example, if the carrier frequency is 200 Hz and the modulator frequency is 100 Hz, then the C:M ratio is 2.</p>
+<p>The previous Faust example could be modified to reflect this change:</p>
+<div class="faust-run"><a href="img/src/exfaust5/exfaust5-svg/process.svg" target="_blank"><img src="img/src/exfaust5/exfaust5-svg/process.svg" class="mx-auto d-block"></a>
+<pre><code>import(&quot;stdfaust.lib&quot;);
+f1 = hslider(&quot;[0]f1&quot;,300,20,1000,0.1);
+a1 = hslider(&quot;[1]a1&quot;,1,0,1,0.01);
+cm = hslider(&quot;[2]CM&quot;,1,1,10,0.1);
+a2 = hslider(&quot;[3]a2&quot;,1,0,100,0.01);
+process = a1*os.osc(f1 + a2*os.osc(f1*cm));</code></pre>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust5/exfaust5.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<p>In frequency modulation, for any given carrier frequency the frequencies of the upper sidebands lie at C+M, C+2M, C+3M,..and so on, while the lower sidebands lie at C-M,C-2M, and so on.</p>
+<p>Lets consider the example in which C:M = 1:1. Let’s assume that both carrier and modulator frequency are placed at 100 Hz. This means that the upper sidebands will be at 200 Hz, 300 Hz, 400 Hz, and so on, while the lower sidebands will be at 0 Hz, -100 Hz,…and so on.</p>
+<p><em>What does the concept of a negative frequency mean?</em> A negative frequency is equivalent to its corresponding positive frequency, but remapped to the positive axes. When summing the same negative and positive frequency, if they have the same amplitude they will cancel each others.</p>
+<p>In FM synthesis the amplitude of the sidebands is not the same, so the issue of cancellation of sidebands does not occur. In the case of FM synthesis, the calculation of the amplitude of each sideband requires the use of <a href="TODO">Bessel functions</a>.</p>
+<!-- RM: I think this section could be a little bit more developed (e.g., do
+your students know what Bessel functions are?). It'd be nice to have some
+spectra figures, etc. -->
+<h2 id="musical-examples">Musical examples</h2>
+<p>To be written.</p>
 <h1 id="faust-codes">Faust Codes</h1>
 <h2 id="additive-synthesizer">Additive Synthesizer</h2>
-<div class="faust-run"><a href="img/src/exfaust1/exfaust1-svg/process.svg" target="_blank"><img src="img/src/exfaust1/exfaust1-svg/process.svg" class="mx-auto d-block"></a>
+<div class="faust-run"><a href="img/src/exfaust6/exfaust6-svg/process.svg" target="_blank"><img src="img/src/exfaust6/exfaust6-svg/process.svg" class="mx-auto d-block"></a>
 <pre><code>import(&quot;stdfaust.lib&quot;);
 
 addSynth(f) = par(i,N,oscillator(i)) :&gt; /(N)
@@ -71,13 +172,13 @@ gain = hslider(&quot;[2]gain&quot;,1,0,1,0.01);
 gate = button(&quot;[3]gate&quot;);
 
 process = addSynth(freq)*gain*gate;</code></pre>
-<a href="http://faust.grame.fr/editor?code=img/src/exfaust1/exfaust1.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust6/exfaust6.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
 <p><code>N</code> changes the number of oscillators…</p>
 <h2 id="adsr-envelope">ADSR Envelope</h2>
 <p>TODO</p>
 <h2 id="decaying-exponential">Decaying Exponential</h2>
 <p>Not really sure how you wanted to implement this, but that seemed like a good way to do it… :)</p>
-<div class="faust-run"><a href="img/src/exfaust2/exfaust2-svg/process.svg" target="_blank"><img src="img/src/exfaust2/exfaust2-svg/process.svg" class="mx-auto d-block"></a>
+<div class="faust-run"><a href="img/src/exfaust7/exfaust7-svg/process.svg" target="_blank"><img src="img/src/exfaust7/exfaust7-svg/process.svg" class="mx-auto d-block"></a>
 <pre><code>import(&quot;stdfaust.lib&quot;);
 
 exDecEnv(t60,gate) = gate : normOnePole(pole)
@@ -97,10 +198,10 @@ with{
 };
 
 process = os.sawtooth(freq)*envelope;       </code></pre>
-<a href="http://faust.grame.fr/editor?code=img/src/exfaust2/exfaust2.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust7/exfaust7.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
 <h2 id="adsr-with-exponential-segments">ADSR With Exponential Segments</h2>
 <p>Example of ADSR envelope with exponential segments applied to a sawtooth wave oscillator.</p>
-<div class="faust-run"><a href="img/src/exfaust3/exfaust3-svg/process.svg" target="_blank"><img src="img/src/exfaust3/exfaust3-svg/process.svg" class="mx-auto d-block"></a>
+<div class="faust-run"><a href="img/src/exfaust8/exfaust8-svg/process.svg" target="_blank"><img src="img/src/exfaust8/exfaust8-svg/process.svg" class="mx-auto d-block"></a>
 <pre><code>import(&quot;stdfaust.lib&quot;);
 
 adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
@@ -126,9 +227,9 @@ with{
 };
 
 process = os.sawtooth(freq)*envelope;   </code></pre>
-<a href="http://faust.grame.fr/editor?code=img/src/exfaust3/exfaust3.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust8/exfaust8.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
 <h2 id="distortion">Distortion</h2>
-<div class="faust-run"><a href="img/src/exfaust4/exfaust4-svg/process.svg" target="_blank"><img src="img/src/exfaust4/exfaust4-svg/process.svg" class="mx-auto d-block"></a>
+<div class="faust-run"><a href="img/src/exfaust9/exfaust9-svg/process.svg" target="_blank"><img src="img/src/exfaust9/exfaust9-svg/process.svg" class="mx-auto d-block"></a>
 <pre><code>import(&quot;stdfaust.lib&quot;);
 
 cubicnl(drive,offset) = *(pregain) : +(offset) : clip(-1,1) : cubic
@@ -142,11 +243,11 @@ drive = hslider(&quot;[0]Drive[style:knob]&quot;,0.5,0,1,0.01);
 offset = hslider(&quot;[1]Offset[style:knob]&quot;,0,-1,1,0.01);
 
 process = hgroup(&quot;Distortion&quot;,cubicnl(drive,offset));</code></pre>
-<a href="http://faust.grame.fr/editor?code=img/src/exfaust4/exfaust4.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust9/exfaust9.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
 <p>We could improve this by adding a DC blocker too.</p>
 <h2 id="compressor">Compressor</h2>
 <p>TODO: this one hasn’t been tested but it seems to work. We should talk about how deep we wanna go in terms of not using pre-written functions. All in all, it seems that we can’t just through Faust examples at student’s face: it needs to be contextualized and build up progressively.</p>
-<div class="faust-run"><a href="img/src/exfaust5/exfaust5-svg/process.svg" target="_blank"><img src="img/src/exfaust5/exfaust5-svg/process.svg" class="mx-auto d-block"></a>
+<div class="faust-run"><a href="img/src/exfaust10/exfaust10-svg/process.svg" target="_blank"><img src="img/src/exfaust10/exfaust10-svg/process.svg" class="mx-auto d-block"></a>
 <pre><code>import(&quot;stdfaust.lib&quot;);
 
 compressor(ratio,thresh,att,rel,kneeAtt,gain) = _ &lt;: _*(ampFollower(att,rel) : 
@@ -171,7 +272,11 @@ ratio = hslider(&quot;[3]Ratio&quot;,1,1,10,0.01);
 makeUpGain = hslider(&quot;[4]Makeup Gain [unit:dB]&quot;,40,-96,96,0.1) : ba.db2linear;
 
 process = vgroup(&quot;Compressor&quot;,compressor(ratio,thresh,att,rel,kneeAtt,makeUpGain));</code></pre>
-<a href="http://faust.grame.fr/editor?code=img/src/exfaust5/exfaust5.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div></div></div></div></main>
+<a href="http://faust.grame.fr/editor?code=https://ccrma.stanford.edu/~rmichon/dsp-book/img/src/exfaust10/exfaust10.dsp"><button type="button" class="btn btn-primary">Try it Yourself >></button></a></div>
+<h1 id="references">References</h1>
+<div id="chowning-fm">
+J. Chowning. The synthesis of complex audio spectra by means of frequency modulation. Journal of the Audio Engineering Society, 21(7):526–534, 1973.
+</div></div></div></div></main>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
