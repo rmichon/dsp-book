@@ -5,6 +5,7 @@
 .faust-doc-content {
   padding-top:0rem;
   padding-right:0rem!important;
+  /*text-align: justify;*/
 }
 
 ul {
@@ -33,4 +34,9 @@ table {
 th, td {
   border-bottom: 1px solid black;
   padding: 0.5rem;
+}
+
+.figCaption {
+  text-align: center;
+  font-weight: bold;
 }
