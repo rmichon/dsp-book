@@ -1,587 +1,58 @@
 # Chapter 1: Introduction
+Digital sound processing is the discipline where signals are manipulated in software through different operations. 
+All these operations will be explained and implemented using Faust.
 
-<!-- TODO: make sure all Faust code examples are properly referenced and 
-documented -->
+##What is sound?
+Sound is a form of energy, created when air molecules propagate in patterns called waves. Such waves of rapidly varying pressure are caused by vibrating objects. As an example, when a person plucks a guitar string, as the string moves in one direction, it pushes on nearby air molecules, causing them to move closer together. This creates a small region of high pressure on one side of the string and low pressure on the opposite side. As the string moves in the opposite direction, the areas of high and low pressure reverse. This compression and rarefaction of air molecules occurs periodically.
+The frequency $f$ of a sound is defined as the number of oscillations per second. It is measured in Hertz (abbreviated as Hz). The amplitude of a sound, measured in decibel (db), represents the size of such variations.
+Sound waves are captured by using a transducer such as a microphone. A microphone converts acoustical waves into electrical waves.
+Figure 1 shows a sinewave or sinusoid in time domain, i.e., in a time versus amplitude axes, in the bottom part. The frequency of this sinewave is 2.5 Hz. The sinewave is a periodic wave, which means that it regularly repeats over time.
+The period is given by $ 1 / f$.
 
-Digital sound processing is the discipline where signals are manipulated in 
-software through different operations. All these operations will be explained 
-and implemented using the [Faust Programming Language](#http://faust.grame.fr).
+Figure 1 shows a sinewave in time domain.
+<img src="img/sine.svg" class="mx-auto d-block">
+Figure 1: time domain representation of a sinewave.
 
-## What is sound?
 
-Sound is a form of energy, created when air molecules propagate in patterns 
-called waves. Such waves of rapidly varying pressure are caused by vibrating 
-objects. As an example, when a person plucks a guitar string, as the string 
-moves in one direction, it pushes on nearby air molecules, causing them to move 
-closer together. This creates a small region of high pressure on one side of 
-the string and low pressure on the opposite side. As the string moves in the 
-opposite direction, the areas of high and low pressure reverse. This 
-compression and rarefaction of air molecules occurs periodically.
+A frequency domain or spectrum representation shows the frequency content of a sound versus the amplitude. The individual frequency components are called harmonics (if they are integer multiple of the fundamental frequency) or partials.
+Figure XX shows the spectrum of the same sinusoid.
 
-The frequency $f$ of a sound is defined as the number of oscillations per 
-second. It is measured in Hertz (abbreviated as Hz). The amplitude of a sound, 
-measured in decibel (db), represents the size of such variations. Sound waves 
-are captured by using a transducer such as a microphone. A microphone converts 
-acoustical waves into electrical waves.
 
-[Figure 1](#figure1) shows a sinewave or sinusoid in the time domain, i.e., in 
-a time versus amplitude axes, in the bottom part. The frequency of this 
-sinewave is 2.5 Hz. The sinewave is a periodic wave, which means that it 
-regularly repeats over time. The period is given by $1 / f$.
+When representing a sound digitally, the soundwave is sampled at
+regular intervals by using an analog to digital converter (ADC),
+which produces numbers which represent the value of each sample.
 
-<img id="figure1" src="img/sine.svg" class="mx-auto d-block" width="80%">
-<div class="figCaption">Figure 1: Time domain representation of a sinewave.</div>
+The sampling rate is defined as the number of samples per seconds.
+As an example, to obtain compact disc quality the sampling rate is
+set to 44.100 Hz, or 44.1 kHz. This means that each second of sound
+is represented by 44.100 samples.
 
-A sine wave oscillator can be quickly implemented in Faust with the following
-code:
+When the goal is to listen to a digitally reproduced sound, the
+operation called digital to analog conversion (DAC) needs to be
+performed. A digital to analog converter reconstructs the sound from
+its samples. Computer sound cards have both ADC to input sounds and
+DAC to output them.
 
-<!-- faust-run -->
-```
-import("stdfaust.lib");
-freq = hslider("freq",440,50,1000,0.01);
-process = os.osc(freq);
-```
-<!-- /faust-run -->	
 
-<!-- RM: unless you want a more "bare bone" implementation with a phasor
-and a sine table, etc. (which is what the diagram shows already anyway) -->
 
-A frequency domain or spectrum representation shows the frequency content of a 
-sound versus the amplitude. The individual frequency components are called 
-harmonics (if they are integer multiple of the fundamental frequency) or 
-partials.
+# Chapter 2: Introduction to sound synthesis
 
-Figure TODO shows the spectrum of the sinusoid presented in 
-[Figure 1](#figure1).
+In the previous chapter we have learned how to represent sounds digitally, and how a sinewave is represented.
+In this Chapter we will learn how to create sounds in software using different synthesis techniques.
+We start with techniques which combine sinewaves together in different ways.
 
-When representing a sound digitally, the soundwave is sampled at regular 
-intervals by using an analog to digital converter (ADC), which produces 
-numbers which represent the value of each sample.
+## Additive synthesis
 
-The sampling rate is defined as the number of samples per seconds. As an 
-example, to obtain compact disc quality the sampling rate is set to 44100 Hz, 
-or 44.1 kHz. This means that each second of sound is represented by 
-44100 samples.
+Additive synthesis is based on the principle that any complex waveform can be created by summing a finite number of sinewaves. This idea derives from the Fourier theorem, which states that any complex sound can be decomposed as the sum of its elementary components, which are sinewaves (also called sinusoids or pure tones).
+As an example, Figure 1 shows the time and frequency domain representation of a square wave. The diagram on the center represents the time domain (top) and frequency domain (bottom) or spectrogram of a square wave.
+The diagram on the right side shows what is known as spectrogram. The spectrogram is a representation time versus frequency of a signal. The amplitude is represented by the greyscale in which the wave is represented. The darker the mark, the higher the amplitude at that specific frequency.
 
-When the goal is to listen to a digitally reproduced sound, the operation 
-called digital to analog conversion (DAC) needs to be performed. A digital to 
-analog converter reconstructs the sound from its samples. Computer sound cards 
-have both ADC to input sounds and DAC to output them.
+Figure XX shows the block diagram of an additive synthesizer. In it, four sinewaves are summed together.
 
-<!-- RM: that's great but is that it haha? May be we could a figure describing 
-sampling? What about Nyquist, etc.? -->
-
-# Chapter 2: Introduction to Sound Synthesis
-
-In the previous chapter, we have learned how to represent sounds digitally, and 
-how a sinewave is represented. In this Chapter, we will learn how to create 
-sounds in software using different synthesis techniques. We start with 
-techniques which combine sinewaves together in different ways.
-
-## Additive Synthesis
-
-Additive synthesis is based on the principle that any complex waveform can be 
-created by summing a finite number of sinewaves. This idea derives from the 
-[Fourier theorem](TODO), which states that any complex sound can be decomposed 
-as the sum of its elementary components, which are sinewaves (also called 
-sinusoids or pure tones).
-
-As an example, [Figure TODO](TODO) shows the time and frequency domain 
-representation of a square wave. The diagram on the center represents the time 
-domain (top) and frequency domain (bottom) or spectrogram of a square wave.
-The diagram on the right side shows what is known as spectrogram. The 
-spectrogram is a representation time versus frequency of a signal. The 
-amplitude is represented by the gray-scale in which the wave is represented. 
-The darker the mark, the higher the amplitude at that specific frequency.
-
-<!-- RM: we're obviously missing a figure here. -->
-
-A square wave oscillator can be easily implemented in Faust with the following
-code:
-
-<!-- faust-run -->
-```
-import("stdfaust.lib");
-freq = hslider("freq",440,50,1000,0.01);
-process = os.square(freq);
-```
-<!-- /faust-run -->	
-
-[Figure 3](#figure3) shows the block diagram of an additive synthesizer. It sums 
-four sinewaves together.
 
 TODO: figure needs to be redone
-<img id="figure3" src="img/additive.svg" class="mx-auto d-block" width="40%">
-<div class="figCaption">Figure 3: Additive synthesizer summing four sine
-waves.</div>
+<img src="img/additive.svg" class="mx-auto d-block">
 
-<!-- RM: I'm not sure the link between the square wave and the additive synth
-is super clear here... -->
-
-A Faust implementation of the diagram presented in [Figure 3](#figure3) could 
-be: 
-
-<!-- faust-run -->
-```
-import("stdfaust.lib");
-nOsc = 4; // number of oscillators
-baseFreq = hslider("Base Freq",440,50,1000,0.1);
-process = par(i,4,os.osc(baseFreq*(i+1))) :> /(nOsc);
-```
-<!-- /faust-run -->			
-
-## Granular Synthesis
-
-A grain of sound can be defines as a brief acoustical event, with a duration 
-near the threshold of human perception (usually between 10 and 60 ms). The idea 
-behind granular synthesis is the creation of complex sound events by combining 
-several grains of sound over time. In granular synthesis, a grain of sound is 
-therefore considered as a building block for the creation of more complex sonic 
-events.
-
-The idea of having sound grains was proposed by the British physicist 
-[Dennis Gabor](TODO) in 1947. Gabor suggested the idea of a quantum of sound, 
-as a perceptual indivisible unit of information. All macro-level phenomena are 
-based on the sound quantum. Granular synthesis was first suggested as a 
-computer music technique for producing complex sounds by [Iannis Xenakis](TODO) 
-and [Curtis Roads](TODO). 
-
-Granular synthesis is based on the production of a high density of small 
-acoustic events called grains that are typically in the range of 10-60 ms.
-To enable smooth transitions between grains, each grain has an amplitude 
-envelope. In Gabor’s original conception, the amplitude envelope is a bell 
-shaped curve generated by the Gaussian method.
-
-### Parameters of Granular Synthesis
-
-The control parameters of a granular synthesizer are the following:
-
-* **Grain Size**: Length of the grain in milliseconds.
-* **Grain Shape**: The grain itself may comes from a sinewave, pulse wave, 
-synthesis techniques such as FM synthesis or sampled sounds.
-* **Envelope Shape**: Envelope shape is the shape of the amplitude envelope of 
-each individual grain.
-* **Grain Spacing Over Time**: Grain spacing is the distance between grain over 
-time. 
-* **Grain Density**: Grain density number of grains per unit of time. Typical 
-grain densities range from several hundred to several thousand grains per second.
-
-#### High-level Grain Organization
-
-When organized over time, grains can be placed in a synchronous or asynchronous 
-way.
-
-##### Synchronous Granular Synthesis
-
-In synchronous granular synthesis, grains are placed at equally spaced 
-positions. This creates a periodicity which provides a sensation of frequency. 
-For example, if grains are placed every 10 ms, a 100 Hz frequency will be heard.
-This technique is designed for the synthesis of tones with one or more 
-resonances, e.g., suitable for imitating musical instruments or the human voice.
-
-#### Asynchronous Granular Synthesis
-
-In asynchronous granular synthesis, grains are scattered randomly over a 
-user-determined duration and with user-determined density and frequency content 
-(depending on the waveform used in the grains).
-
-### Implementation
-
-Granular synthesis can be implemented generating small sound events and placing 
-them over time as if in a score. Lots of parameters are involved. Their choice 
-and organisation is what makes granular synthesis more or less interesting.
-
-<!-- TODO: need a Faust implementation of that -->
-
-#### Time Stretching
-
-In synchronous granular synthesis, it is possible to create time stretching 
-effects by repeating the grains is a longer (or shorter) amount of time, 
-without varying their distance.
-
-<!-- TODO: need a Faust example of that -->
-
-#### Pitch Shifting
-
-In synchronous granular synthesis, it is possible to create pitch shifting 
-effects by changing the space between the grains.
-
-<!-- TODO: need a Faust example of that -->
-
-# Chapter 3: Modulation Synthesis
-
-In this Chapter we will explain some classic modulation techniques.
-Modulation is the alteration of the amplitude, frequency and /or phase of an 
-oscillator in accordance with another signal. The original oscillator is called 
-the carrier signal, while the modulating signal is called the modulator signal.
-In this Chapter we will examine three forms of modulations: Ring Modulation (RM), 
-Amplitude Modulation (AM), and Frequency Modulation (FM).
-
-## Ring modulation
-
-Ring modulation is simply the multiplication of two signals. Ring modulation 
-has been extensively used by the German composer [Karlheinz Stockhausen](TODO). 
-It has also been used in the implementation of the first movie completely 
-designed with electronic sounds: [Forbidden Planet](TODO) (1956). Ring 
-modulation has also been used extensively in video games. As an example, the 
-sound chip of [Commodore 64](TODO) had ring modulation implemented, which was 
-used in sound effects for several games.
-<!-- RM: that's a lot of "been used..." -->
-
-The algorithm of ring modulation can be summarized as follows:
-
-TODO: insert ring mod diagram here
-
-In order to understand what happens to the spectrum of a sound when we 
-multiply two signals, let’s consider the simple case of multiplying two 
-cosinewaves:
-
-$$y(t) = \cos(\omega_1 t) \cos (\omega_2 t)$$ 
-
-<!-- Why cosine and not sine? -->
-
-where $\omega_1$ and $\omega_2$ represent the frequencies of two sinewaves.
-
-Using trigonometric identities, the following equation holds:
-
-$$y(t) = \cos(\omega_1 t) \cos (\omega_2 t) = \frac {1}{2}[ \cos((\omega_1-\omega_1)  t)) +  \cos((\omega_1+ \omega_1)  t))$$ 
-
-As an example, if we consider two cosinewaves whose frequencies are 
-$\omega_1 = 300$ Hz and $\omega_2 = 100$ Hz respectively, multiplying them 
-provides the sum of two sinewaves whose frequencies are 200 Hz and 400 Hz 
-respectively, and whose amplitude is the half of the original amplitude.
-
-<!-- RM: respectively... Also, can we really say that w1 and w2 are frequencies
-in Hz while they're supposed to be radian frequencies? -->
-
-A Faust implementation of the previous equation could be:
-
-<!-- faust-run -->
-```
-import("stdfaust.lib");
-f1 = hslider("f1",300,20,1000,0.1);
-f2 = hslider("f2",100,20,1000,0.1);
-process = os.osc(f1)*os.osc(f2);
-```
-<!-- /faust-run -->		
-
-Note that the modulation could be applied to an input signal simply by making 
-the following modification:
-
-<!-- faust-run -->
-```
-import("stdfaust.lib");
-modFreq = hslider("Modulation Frequency",300,20,1000,0.1);
-process = *(os.osc(modFreq));
-```
-<!-- /faust-run -->		
-
-### Tremolo Effect
-
-Tremolo is defined as the variation of the amplitude of a signal. A tremolo 
-effect can be obtained with a ring modulator, but having the frequency of the 
-modulator signal below 20 Hz.
-
-A Faust implementation of a simple tremolo effect could be:
-
-<!-- faust-run -->
-```
-import("stdfaust.lib");
-modFreq = hslider("Modulation Frequency",8,0.001,20,0.1);
-process = *(os.osc(modFreq));
-```
-<!-- /faust-run -->		
-
-<!-- RM: do we want to do some scaling on the signal of the sine oscillator to
-prevent the phase inversion? If yes, should we comment that in the body of the
-text and add some math? -->
-
-## Amplitude Modulation
-
-In the ring modulation equation the frequency of the carrier signal is not 
-present anymore in the resulting sound. In order to avoid this, the ring 
-modulation equation can be modified. Amplitude modulation is mathematically 
-expressed as:
-
-$$y(t) = \cos(\omega_1 t) (\cos (\omega_2 t)+1)$$ 
-
-Using again trigonometric identities, the result of such multiplication 
-becomes:
-
-$$y(t) =  \frac {1}{2}[ \cos((\omega_1-\omega_1)  t)) +  \cos((\omega_1+ \omega_1)  t)) + \cos(\omega_1 t) $$ 
-
-The corresponding Faust implementation could be:
-
-<!-- faust-run -->
-```
-import("stdfaust.lib");
-f1 = hslider("f1",300,20,1000,0.1);
-f2 = hslider("f2",100,20,1000,0.1);
-process = os.osc(f1)*(os.osc(f2)+1)*0.5;
-```
-<!-- /faust-run -->		
-
-Note that the whole process must be multiplied by 0.5 here to restrain the
-range of the generated signal between -1 and 1 to prevent clicking.
-
-## Frequency Modulation
-
-Frequency modulation (FM) is a synthesis technique 
-[invented by John Chowning](#chowning-fm) at Stanford University in California.
-
-The FM patent was licensed from Stanford University to Yamaha, and allowed the 
-creation of the [DX7](TODO), the most successful synthesizer in history.
-FM synthesis was the most popular synthesis techniques in the 80s, especially 
-for its ability to create several complex sounds with very little computational 
-power.
-
-The main idea behind frequency modulation is the fact that the frequency of a 
-carrier oscillator can be modulated by another oscillator. Mathematically 
-speaking, given two cosine waves:
-
-$$
-y_1(t) = a_1 \cos(\omega_1 t) \\
-y_2(t) = a_2 \cos(\omega_2 t)
-$$
-
-FM can be expressed as:
-
-$$y = \cos((\omega_1 + a_2 cos (\omega_2 t)) t)$$
-
-<!-- RM: where did a1 go? -->
-
-The corresponding Faust implementation could look like:
-
-<!-- faust-run -->
-```
-import("stdfaust.lib");
-f1 = hslider("[0]f1",300,20,1000,0.1);
-a1 = hslider("[1]a1",1,0,1,0.01);
-f2 = hslider("[2]f2",100,20,1000,0.1);
-a2 = hslider("[3]a2",1,0,100,0.01);
-process = a1*os.osc(f1 + a2*os.osc(f2));
-```
-<!-- /faust-run -->	
-
-This equation therefore represents a cosine wave whose frequency is modulated 
-by another cosine wave. The result is a very complex spectrum able to generate 
-not only a few sidebands like amplitude and ring modulation, but an infinite 
-number of sidebands.
-
-<!-- RM: I don't think we mentioned the concept of sidebands in the AM section,
-I think we should. -->
-
-More precisely, John Chowning discovered that with frequency modulation it is 
-possible to produce sidebands given by the following equation:
-
-$$
-\omega_s = \omega_c \pm n \omega_n
-$$
-
-where $n$ is an integer, $\omega_c$ is the carrier's frequency and $\omega_m$ 
-is the modulation frequency.
-
-<!-- wm or wn? ;) -->
-
-This equation simply expresses the fact that each sideband lies at a frequency 
-which is equal to the carrier frequency plus or minus an integer multiple of 
-the modulator frequency.
-
-In theory, since $n$ can take any integer value, applying frequency modulation 
-produces an infinite series of sidebands. In practice this is not the case, as 
-we will see later.
-
-The calculation of the amplitude of sidebands is a quite complex task. We need 
-to introduce a new term named $\beta$, known as the modulation index. In the 
-frequency modulation equation, $\beta$ represents $a_2$, the amplitude of the 
-modulator. $\beta$ is defined as:
-
-$$
-\beta = \frac {\Delta \omega_c}{\omega_n}
-$$
-
-where $\Delta \omega_c$
-is the variation of the carrier frequency (the amount of variations of the carrier frequency from its unmodulated frequency).
-
-### Bandwidth
-
-The bandwidth of a signal can be defined as the range of frequencies occupied 
-by a given signal. For example, a signal composed by two sinusoids, one at 
-100 Hz and one at 200 Hz has a bandwidth of 100 Hz. On the other hand, a signal 
-composed by the sum of two sinusoids, one at frequency 100 Hz and another at 
-frequency 400 Hz has a bandwidth of 300 Hz.
-
-**Exercise:** Two cosine waves at frequencies 300 Hz and 500 Hz are 
-ring-modulated. What is the bandwidth of the resulting signal? For frequency 
-modulation, there is a rule of thumb which states the following:
-
-$$ B = 2 \omega_m (1 + \beta) $$
-
-### The C:M Ratio
-
-The C:M ratio expresses the relative frequencies of carrier and modulator 
-signal. An an example, if the carrier frequency is 200 Hz and the modulator 
-frequency is 100 Hz, then the C:M ratio is 2.
-
-The previous Faust example could be modified to reflect this change:
-
-<!-- faust-run -->
-```
-import("stdfaust.lib");
-f1 = hslider("[0]f1",300,20,1000,0.1);
-a1 = hslider("[1]a1",1,0,1,0.01);
-cm = hslider("[2]CM",1,1,10,0.1);
-a2 = hslider("[3]a2",1,0,100,0.01);
-process = a1*os.osc(f1 + a2*os.osc(f1*cm));
-```
-<!-- /faust-run -->	
-
-In frequency modulation, for any given carrier frequency the frequencies of the 
-upper sidebands lie at C+M, C+2M, C+3M,..and so on, while the lower sidebands 
-lie at C-M,C-2M, and so on.
-
-Lets consider the example in which C:M = 1:1. Let’s assume that both carrier 
-and modulator frequency are placed at 100 Hz. This means that the upper 
-sidebands will be at 200 Hz, 300 Hz, 400 Hz, and so on, while the lower 
-sidebands will be at 0 Hz, -100 Hz,...and so on.
-
-*What does the concept of a negative frequency mean?* A negative frequency is 
-equivalent to its corresponding positive frequency, but remapped to the 
-positive axes. When summing the same negative and positive frequency, if they 
-have the same amplitude they will cancel each others.
-
-In FM synthesis the amplitude of the sidebands is not the same, so the issue of 
-cancellation of sidebands does not occur. In the case of FM synthesis, the 
-calculation of the amplitude of each sideband requires the use of 
-[Bessel functions](TODO).
-
-<!-- RM: I think this section could be a little bit more developed (e.g., do
-your students know what Bessel functions are?). It'd be nice to have some
-spectra figures, etc. -->
-
-## Musical examples
-
-To be written.
-
-
-# Chapter 4: Filters
-
-According to Professor and DSP guru [Julius Smith](TODO), <!-- RM: lol -->
-everything is a [filter](TODO). <!-- RM: link to JOS' books -->
-As a matter of fact, a filter is any operation that 
-takes an input signal, performs some manipulations, and produces an output 
-signal.
-
-## Simplest Lowpass Filter
-
-The simplest lowpass filter is given by the difference equation:
-
-$$
-y[n] = x[n] + x[n-1] 
-$$
-
-<!-- RM: squared brackets? -->
-
-As can be seen from the equation, the filter simply sums the current input 
-sample and the previous input sample.
-
-A possible Faust implementation corresponding to this equation is:
-
-<!-- faust-run -->
-```
-process = _ <: _,_' :> _;
-```
-<!-- /faust-run -->	
-
-Note that the [`'` primitive](TODO) can be used in Faust to create a one
-sample delay. It is also equivalent to `@(1)` (see the section on 
-[Basic Delay](#basic-delay)). 
-
-<!-- RM: Is that it? ;) Do we add a zero to this filter ;)? Do we explain what
-it does haha? -->
-
-# Chapter 5: Delay-Based Effects
-
-## Basic Delay
-
-A basic delay simply plays an input sound after a specific amount of time.
-Mathematically speaking, a delay can be expressed as:
-
-$$y[n] = x[n -N]$$
-
-where $n$ represents the current time in samples and $N$ represents the delay 
-time in samples.
-
-<img src="img/delay.svg" class="mx-auto d-block" width="26%">
-<div class="figCaption">Figure TODO: Block diagram of a delay operation.</div>
-
-<!-- RM: I think N should appear in the figure... -->
-
-The corresponding Faust implementation is:
-
-<!-- faust-run -->
-```
-N = hslider("N",1,1,100,1);
-process = @(N);
-```
-<!-- /faust-run -->	
-
-Note that the [`@` primitive](TODO) can be used in Faust to create a dynamic
-delay. In this case `N` must be an integer.
-
-## Echo
-
-When mixing the delayed output with the original input, we obtain an echo 
-effect. Specifically, an echo effect is given by:
-
-$$y[n] = x[n] + g x[n -N]$$
-
-<!-- RM: still those squared brackets haha -->
-
-where $N$ is the delay of the signal, typically in the range of $10$ to $50$ ms, 
-and  $g$ is the gain, $( g <1)$, since the delayed signal is attenuated. A 
-physical interpretation of $g$ is propagation losses of sound in the air.
-
-The corresponding Faust implementation is:
-
-<!-- faust-run -->
-```
-g = hslider("g",0.5,0,1,0.01);
-N = hslider("N",1000,1,60000,1);
-process = +~(@(N)*g);
-```
-<!-- /faust-run -->	
-
-## Feedback delay
-The simple feedforward echo shown in the previous example has limited applications, since it produces only a single echo.
-Adding feedback allows to obtain a potentially infinite number of echoes.
-The difference equation in this case becomes:
-
-
-## Flanger
-
-
-## LFO
-## Chorus
-
-## Overdrive and clipping
-## Tremolo
-
-
-## Doppler effect
-
-
-
-# Chapter 6: Spatial sound
-
-
-			
-			
-# References
-
-<div id="chowning-fm">J. Chowning. The synthesis of complex audio spectra by 
-means of frequency modulation. Journal of the Audio Engineering Society, 
-21(7):526–534, 1973.</div> 
 
 # Faust Codes
 
@@ -747,6 +218,392 @@ makeUpGain = hslider("[4]Makeup Gain [unit:dB]",40,-96,96,0.1) : ba.db2linear;
 process = vgroup("Compressor",compressor(ratio,thresh,att,rel,kneeAtt,makeUpGain));
 ```
 <!-- /faust-run -->	
+
+
+
+## Granular synthesis
+
+A grain of sound can be defines as a brief acoustical event, with a duration near the treshold of human perception (usually between 10 and 60 ms). 
+The idea behind granular synthesis is the creation of complex sound events by combining several grains of sound over time. In granular synthesis, a grain of sound is therefore considered as a building block for the creation of more complex sonic events.
+
+The idea of having sound grains was proposed by the British physicist Dennis Gabor in 1947. Gabor suggested the idea of a quantum of sound, as a perceptual indivisible unit of information. All macro-level phenomena are based on the sound quantum.
+Granular synthesis was first suggested as a computer music technique for producing complex sounds by Iannis Xenakis and Curtis Roads.
+Granular synthesis is based on the production of a high density of small acoustic events called grains that are typically in the range of 10-60 ms.
+To enable smooth transitions between grains, each grain has an amplitude envelope. In Gabor’s original conception, the amplitude envelope is a bell shaped curve generated by the Gaussian method.
+
+###Parameters of granular synthesis
+The control parameters of a granular synthesizer are the following:
+
+####Grain size:
+ length of the grain in milliseconds.
+#### Grain shape. 
+The grain itself may come from a sinewave, pulse wave, synthesis techniques such as FM synthesis or sampled sounds.
+
+####Envelope shape.
+Envelope shape is the shape of the amplitude envelope of each individual grain
+####Grain spacing over time.
+Grain spacing is the distance between grain over time. 
+####Grain density: 
+Grain density number of grains per unit of time.
+Typical grain densities range from several hundred to several thousand grains per second.
+#### High-level grain organization
+When organized over time, grains can be placed in a synchronous or asynchronous way.
+
+#### Synchronous granular synthesis
+In synchronous granular synthesis, grains are placed at equally spaced positions. This creates a periodicity which provides a sensation of frequency. For example, if grains are placed every 10 ms, a 100 Hz frequency will be heard.
+This technique is designed for the synthesis of tones with one or more resonances, e.g., suitable for imitating musical instruments or the human voice.
+
+#### Asynchronous granular synthesis
+In asynchronous granular synthesis, grains are scattered randomly over a user-determined duration and with user-determined density and frequency content (depending on the waveform used in the grains).
+### Implementation
+Granular synthesis can be implemented generating small sound events and placing them over time as if in a score. Lots of parameters are involved. Their choice and organisation is what makes granular synthesis more or less interesting.
+
+#### Time stretching
+In synchronous granular synthesis, it is possible to create time stretching effects by repeating the grains is a longer (or shorter) amount of time, without varying their distance.
+#### Pitch shifting
+In synchronous granular synthesis, it is possible to create pitch shifting effects by changing the space between the grains.
+
+
+
+# Chapter 3: Modulation Synthesis
+
+In this Chapter we will explain some classic modulation techniques.
+Modulation is the alteration of the amplitude, frequency and /or phase of an 
+oscillator in accordance with another signal. The original oscillator is called 
+the carrier signal, while the modulating signal is called the modulator signal.
+In this Chapter we will examine three forms of modulations: Ring Modulation (RM), 
+Amplitude Modulation (AM), and Frequency Modulation (FM).
+
+## Ring modulation
+
+Ring modulation is simply the multiplication of two signals. Ring modulation 
+has been extensively used by the German composer [Karlheinz Stockhausen](TODO). 
+It is also found in the implementation of the first movie completely 
+designed with electronic sounds: [Forbidden Planet](TODO) (1956). Ring 
+modulation is also extensively present in video games. As an example, the 
+sound chip of [Commodore 64](TODO) had ring modulation implemented, which was 
+used in sound effects for several games.
+<!-- RM: that's a lot of "been used..." -->
+<! fixed ...grrrrr !>
+
+The algorithm of ring modulation can be summarized as follows:
+
+TODO: insert ring mod diagram here
+
+In order to understand what happens to the spectrum of a sound when we 
+multiply two signals, let’s consider the simple case of multiplying two 
+cosinewaves:
+
+$$y(t) = \cos(\omega_1 t) \cos (\omega_2 t)$$ 
+
+<!-- Why cosine and not sine? -->
+<! --- why not? -----ok I change it!>
+
+where $\omega_1$ and $\omega_2$ represent the frequencies of two sinewaves.
+
+Using trigonometric identities, the following equation holds:
+
+$$y(t) = \sin(\omega_1 t) \sin (\omega_2 t) = \frac {1}{2}[ \cos((\omega_1-\omega_2)  t)) -  \cos((\omega_1+ \omega_2)  t))$$ 
+
+Usually one of the frequency components is called the carrier frequency, while the other is called modulation frequency.
+These two sinusoidal components created at the sum and difference frequencies of the modulator and carrier are called sidebands.
+Ring modulation produces two sidebands.
+
+A Faust implementation of the previous equation could be:
+
+<!-- faust-run -->
+```
+import("stdfaust.lib");
+f1 = hslider("f1",300,20,1000,0.1);
+f2 = hslider("f2",100,20,1000,0.1);
+process = os.osc(f1)*os.osc(f2);
+```
+<!-- /faust-run -->		
+
+Note that the modulation could be applied to any input signal simply by making 
+the following modification:
+
+<!-- faust-run -->
+```
+import("stdfaust.lib");
+modFreq = hslider("Modulation Frequency",300,20,1000,0.1);
+process = *(os.osc(modFreq));
+```
+<!-- /faust-run -->		
+
+### Tremolo Effect
+
+Tremolo is defined as the variation of the amplitude of a signal. A tremolo 
+effect can be obtained with a ring modulator, but having the frequency of the 
+modulator signal below 20 Hz.
+
+A Faust implementation of a simple tremolo effect could be:
+
+<!-- faust-run -->
+```
+import("stdfaust.lib");
+modFreq = hslider("Modulation Frequency",8,0.001,20,0.1);
+process = *(os.osc(modFreq));
+```
+<!-- /faust-run -->		
+
+<!-- RM: do we want to do some scaling on the signal of the sine oscillator to
+prevent the phase inversion? If yes, should we comment that in the body of the
+text and add some math? -->
+
+## Amplitude Modulation
+
+In the ring modulation equation the frequency of the carrier signal is not 
+present anymore in the resulting sound. In order to avoid this, the ring 
+modulation equation can be modified. Amplitude modulation is mathematically 
+expressed as:
+
+$$y(t) = \cos(\omega_1 t) (\cos (\omega_2 t)+1)$$ 
+
+Using again trigonometric identities, the result of such multiplication 
+becomes:
+
+$$y(t) =  \frac {1}{2}[ \cos((\omega_1-\omega_1)  t)) +  \cos((\omega_1+ \omega_1)  t)) + \cos(\omega_1 t) $$ 
+
+The corresponding Faust implementation could be:
+
+<!-- faust-run -->
+```
+import("stdfaust.lib");
+f1 = hslider("f1",300,20,1000,0.1);
+f2 = hslider("f2",100,20,1000,0.1);
+process = os.osc(f1)*(os.osc(f2)+1)*0.5;
+```
+<!-- /faust-run -->		
+
+Note that the whole process must be multiplied by 0.5 here to restrain the
+range of the generated signal between -1 and 1 to prevent clicking.
+
+## Frequency Modulation
+
+Frequency modulation (FM) is a synthesis technique 
+[invented by John Chowning](#chowning-fm) at Stanford University in California.
+
+The FM patent was licensed from Stanford University to Yamaha, and allowed the 
+creation of the [DX7](TODO), the most successful synthesizer in history.
+FM synthesis was the most popular synthesis techniques in the 80s, especially 
+for its ability to create several complex sounds with very little computational 
+power.
+
+The main idea behind frequency modulation is the fact that the frequency of a 
+carrier oscillator can be modulated by another oscillator. Mathematically 
+speaking, given two cosine waves:
+
+$$
+y_1(t) = a_1 \cos(\omega_1 t) \\
+y_2(t) = a_2 \cos(\omega_2 t)
+$$
+
+FM can be expressed as:
+
+$$y = \cos((\omega_1 + a_2 cos (\omega_2 t)) t)$$
+
+<!-- RM: where did a1 go? -->
+
+The corresponding Faust implementation could look like:
+
+<!-- faust-run -->
+```
+import("stdfaust.lib");
+f1 = hslider("[0]f1",300,20,1000,0.1);
+a1 = hslider("[1]a1",1,0,1,0.01);
+f2 = hslider("[2]f2",100,20,1000,0.1);
+a2 = hslider("[3]a2",1,0,100,0.01);
+process = a1*os.osc(f1 + a2*os.osc(f2));
+```
+<!-- /faust-run -->	
+
+This equation therefore represents a cosine wave whose frequency is modulated 
+by another cosine wave. The result is a very complex spectrum able to generate 
+not only a few sidebands like amplitude and ring modulation, but an infinite 
+number of sidebands.
+
+<!-- RM: I don't think we mentioned the concept of sidebands in the AM section,
+I think we should. -->
+
+More precisely, John Chowning discovered that with frequency modulation it is 
+possible to produce sidebands given by the following equation:
+
+$$
+\omega_s = \omega_c \pm n \omega_n
+$$
+
+where $n$ is an integer, $\omega_c$ is the carrier's frequency and $\omega_n$ 
+is the modulation frequency.
+
+<!-- wm or wn? ;) -->
+<! fixed !>
+
+This equation simply expresses the fact that each sideband lies at a frequency 
+which is equal to the carrier frequency plus or minus an integer multiple of 
+the modulator frequency.
+
+In theory, since $n$ can take any integer value, applying frequency modulation 
+produces an infinite series of sidebands. In practice this is not the case, as 
+we will see later.
+
+The calculation of the amplitude of sidebands is a quite complex task. We need 
+to introduce a new term named $\beta$, known as the modulation index. In the 
+frequency modulation equation, $\beta$ represents $a_2$, the amplitude of the 
+modulator. $\beta$ is defined as:
+
+$$
+\beta = \frac {\Delta \omega_c}{\omega_n}
+$$
+
+where $\Delta \omega_c$
+is the variation of the carrier frequency (the amount of variations of the carrier frequency from its unmodulated frequency).
+
+### Bandwidth
+
+The bandwidth of a signal can be defined as the range of frequencies occupied 
+by a given signal. For example, a signal composed by two sinusoids, one at 
+100 Hz and one at 200 Hz has a bandwidth of 100 Hz. On the other hand, a signal 
+composed by the sum of two sinusoids, one at frequency 100 Hz and another at 
+frequency 400 Hz has a bandwidth of 300 Hz.
+
+**Exercise:** Two cosine waves at frequencies 300 Hz and 500 Hz are 
+ring-modulated. What is the bandwidth of the resulting signal? For frequency 
+modulation, there is a rule of thumb which states the following:
+
+$$ B = 2 \omega_m (1 + \beta) $$
+
+### The C:M Ratio
+
+The C:M ratio expresses the relative frequencies of carrier and modulator 
+signal. An an example, if the carrier frequency is 200 Hz and the modulator 
+frequency is 100 Hz, then the C:M ratio is 2.
+
+The previous Faust example could be modified to reflect this change:
+
+<!-- faust-run -->
+```
+import("stdfaust.lib");
+f1 = hslider("[0]f1",300,20,1000,0.1);
+a1 = hslider("[1]a1",1,0,1,0.01);
+cm = hslider("[2]CM",1,1,10,0.1);
+a2 = hslider("[3]a2",1,0,100,0.01);
+process = a1*os.osc(f1 + a2*os.osc(f1*cm));
+```
+<!-- /faust-run -->	
+
+In frequency modulation, for any given carrier frequency the frequencies of the 
+upper sidebands lie at C+M, C+2M, C+3M,..and so on, while the lower sidebands 
+lie at C-M,C-2M, and so on.
+
+Lets consider the example in which C:M = 1:1. Let’s assume that both carrier 
+and modulator frequency are placed at 100 Hz. This means that the upper 
+sidebands will be at 200 Hz, 300 Hz, 400 Hz, and so on, while the lower 
+sidebands will be at 0 Hz, -100 Hz,...and so on.
+
+*What does the concept of a negative frequency mean?* A negative frequency is 
+equivalent to its corresponding positive frequency, but remapped to the 
+positive axes. When summing the same negative and positive frequency, if they 
+have the same amplitude they will cancel each others.
+
+In FM synthesis the amplitude of the sidebands is not the same, so the issue of 
+cancellation of sidebands does not occur. In the case of FM synthesis, the 
+calculation of the amplitude of each sideband requires the use of 
+[Bessel functions](TODO).
+
+<!-- RM: I think this section could be a little bit more developed (e.g., do
+your students know what Bessel functions are?). It'd be nice to have some
+spectra figures, etc. -->
+
+## Musical examples
+
+To be written.
+
+
+#Chapter 4: Filters
+According to Professor and DSP guru Julius Smith, everything is a filter. As a matter of fact, a filter is any operation that takes an input signal, performs some manipulations, and produces an output signsl.
+
+##Simplest lowpass filter
+The simplest lowpass filter is given by the difference equation:
+$$
+y[n] = x[n] + x[n-1] 
+$$
+As can be seen from the equation, the filter simply sums the current input sample and the previous input sample.
+
+#Chapter 5: Delay based effects
+## Basic delay
+A basic delay simply plays an input sound after a specific amount of time.
+Mathematically speaking, a delay can be expressed as:
+$$y[n] = x[n -N]$$
+where $n$ represents the current time in samples and $N$ represents the delay time in samples.
+
+<img src="img/delay.svg" class="mx-auto d-block">
+
+The delay is an essential building block for several other effects such as echo, reverb, chorus, flanging, as well as waveguide based simulations of musical instruments.
+
+### Echo
+
+When mixing the delayed output with the original input, we obtain an echo effect.
+Specifically, and echo effect is given by:
+
+$$y[n] = x[n] + g x[n -N]$$
+
+where $N$ is the delay of the signal, typically in the range of $10$ to $50$ ms, and  $g$ is the gain, $( g <1)$, since the delayed signal is attenuated. A physical interpretation of $g$ is propagation losses of sound in air.
+
+### Feedback delay
+The simple feedforward echo shown in the previous example has limited applications, since it produces only a single echo.
+Adding feedback allows to obtain a potentially infinite number of echoes.
+The difference equation in this case becomes:
+$$
+y[n] = x[n] + g y[n - M]
+$$
+where $M$ is the length of the feedback delay in samples and $g$ represents the gain, $ g <1$.
+
+### Flanger
+A flanging effect is obtained when a signal is mixed with a slightly delayed copy of itself. The length of the delay line changes constantly.
+The flanger effect resembles an echo effect, but with shorter delay time (typically $1 to 10$ ms).
+
+The difference equation of a flanger effect is:
+$$
+y[n] = x[n] + g x[n - M(n)]
+$$
+where $x[n]$ represents the input signal, $y[n]$ the output signal, $g$ the depth of the flanging effect and $M(n)$ the length of the delay line at sample $n$.
+In order to obtain a flanger effect, $M(n)$ varies smoothly over time.
+
+<! Note Stefania: we need to introduce interpolated delay lines....here or later? -!>
+
+
+
+###LFO
+
+
+### Chorus
+In real life a chorus is a group of singers performing together.
+When for example two people perform together, they will have some small variations in the pitch and timbre of their voices, as well as small temporal variations.
+As an analogy, a chorus effect is obtained by making one instrument sounding like many are playing together.
+These small variations are obtained by modulating the original signal with time-varying short delays, as well as implementing detuning.
+
+<img src="img/chorus.svg" class="mx-auto d-block">
+
+
+### Overdrive and clipping
+
+
+
+### Doppler effect
+
+
+
+#Chapter 6: Spatial sound
+
+
+			
+			
+# References
+
+<div id="chowning-fm">J. Chowning. The synthesis of complex audio spectra by 
+means of frequency modulation. Journal of the Audio Engineering Society, 
+21(7):526–534, 1973.</div> 
 
  
       
