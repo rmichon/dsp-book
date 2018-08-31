@@ -560,7 +560,7 @@ $$
 where $M$ is the length of the feedback delay in samples and $g$ represents the gain, $ g <1$.
 
 ### Flanger
-A flanging effect is obtained when a signal is mixed with a slightly delayed copy of itself. The length of the delay line changes constantly.
+A flanger or flanging effect is obtained when a signal is mixed with a slightly delayed copy of itself. The length of the delay line changes constantly.
 The flanger effect resembles an echo effect, but with shorter delay time (typically $1 to 10$ ms).
 
 The difference equation of a flanger effect is:
@@ -575,7 +575,9 @@ In order to obtain a flanger effect, $M(n)$ varies smoothly over time.
 
 
 ###LFO
-
+As can be seen in Figure XXX, the  delay line's length is modulated by a low-frequency oscillator (LFO). The low-frequency oscillator is a periodic waveform, e.g. a sinewave or a triangle wave, with a low-frequency periodicity (e.g. 3 Hz and below).
+The LFO 's control parameters are its frequency, amplitude and shape.
+In a LFO, the waveform describes how the delay changes over time (e.g. the maximum of the waveform is the maximum of the delay). As an example, when the LFO is a sinewave, both the pitch and the length of the delay change continuously.
 
 ### Chorus
 In real life a chorus is a group of singers performing together.
