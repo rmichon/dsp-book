@@ -537,18 +537,31 @@ Mathematically speaking, a delay can be expressed as:
 $$y[n] = x[n -N]$$
 where $n$ represents the current time in samples and $N$ represents the delay time in samples.
 
+A block diagram of a simple delay effect can be seen in Figure 5.1
+
 <img src="img/delay.svg" class="mx-auto d-block">
+
+Figure 5.1 A simple delay effect
 
 The delay is an essential building block for several other effects such as echo, reverb, chorus, flanging, as well as waveguide based simulations of musical instruments.
 
 ### Echo
 
 When mixing the delayed output with the original input, we obtain an echo effect.
-Specifically, and echo effect is given by:
+Specifically, an echo effect is given by:
 
 $$y[n] = x[n] + g x[n -N]$$
 
+
+
+A block diagram of an echo effect can be seen in Figure 5.2
+
+<img src="img/echo.svg" class="mx-auto d-block">
+
+Figure 5.2 Block diagram of an echo effect
+
 where $N$ is the delay of the signal, typically in the range of $10$ to $50$ ms, and  $g$ is the gain, $( g <1)$, since the delayed signal is attenuated. A physical interpretation of $g$ is propagation losses of sound in air.
+
 
 ### Feedback delay
 The simple feedforward echo shown in the previous example has limited applications, since it produces only a single echo.
@@ -559,9 +572,40 @@ y[n] = x[n] + g y[n - M]
 $$
 where $M$ is the length of the feedback delay in samples and $g$ represents the gain, $ g <1$.
 
-### Flanger
-A flanger or flanging effect is obtained when a signal is mixed with a slightly delayed copy of itself. The length of the delay line changes constantly.
-The flanger effect resembles an echo effect, but with shorter delay time (typically $1 to 10$ ms).
+More complex feedbacks can also be obtain, for example like the one shown in Figure 5.3
+
+
+The difference equation in this case becomes:
+$$ y[n] = x[n] + d[n]$$
+where 
+$d[n] = g( x[n-N] + g_f d[n - N])$
+
+since
+$d[n-N] = y[n-N] - x[n-N]$
+we have
+$$ y[n] = x[n] + g ( x[n- N] + g_f (y[n-N]-x[n-N])
+$$
+= $$ x[n] + g(1-g_f) x [n-N] + g g_f y[n-N]
+$$
+
+
+And the block diagram can be seen in Figure 5.3
+
+<img src="img/delayfeedback.svg" class="mx-auto d-block">
+
+Figure 5.3 Block diagram of a feedback-delay effect
+
+
+
+
+
+### Flanging
+
+Flanging is a delay effect that in analogue form has been present in recording studios since the 60s.
+The flanging effect can be understood as two tape machines playing at unison, but where in one of the tapes a flange delays the playback time.
+This continuously varying short delay introduces the characteristic flanging effect.
+
+A flanger or flanging effect is therefore obtained when a signal is mixed with a slightly delayed copy of itself. The flanger effect resembles an echo effect, but with shorter delay time (typically $1 to 10$ ms).
 
 The difference equation of a flanger effect is:
 $$
@@ -569,8 +613,13 @@ y[n] = x[n] + g x[n - M(n)]
 $$
 where $x[n]$ represents the input signal, $y[n]$ the output signal, $g$ the depth of the flanging effect and $M(n)$ the length of the delay line at sample $n$.
 In order to obtain a flanger effect, $M(n)$ varies smoothly over time.
+This requires the use of fractional delay lines, introduced later in this chapter.
 
 <! Note Stefania: we need to introduce interpolated delay lines....here or later? -!>
+
+<img src="img/chorus.svg" class="mx-auto d-block">
+
+Figure 5.5 Block diagram of a flanging effect
 
 
 
@@ -584,16 +633,34 @@ In real life a chorus is a group of singers performing together.
 When for example two people perform together, they will have some small variations in the pitch and timbre of their voices, as well as small temporal variations.
 As an analogy, a chorus effect is obtained by making one instrument sounding like many are playing together.
 These small variations are obtained by modulating the original signal with time-varying short delays, as well as implementing detuning.
+The block diagram of a simple chorus effect with two voices is the same as the flanger.
 
-<img src="img/chorus.svg" class="mx-auto d-block">
+####Multivoice chorus
+The chorus effect described in the previous section has only two voices, e.g., the original one and the modulated one.
+A more realistic chorus can be obtained increasing the number of voices.
+This is shown in Figure 5.6, where a chorus with three voices is implemented. 
 
+<img src="img/multichorus.svg" class="mx-auto d-block">
 
-### Overdrive and clipping
+Figure 5.6 Block diagram of a chorus effect with three voices.
 
+### Fractional delays
 
+As shown at the beginning of this chapter, digital delays are implemented using a memory buffer of discrete audio samples.
+There are, however, some situations where the delay length is a non integer number.
+Let's assume for example we want to implement a delay of 15 ms at a sampling rate of 44100 Hz. This means that the delay length will be 
+$ 44100 Hz * 0.15 s* which corresponds to 661.5 samples.
+This non integer number is practically implemented using so-called fractional delays [#laasko.  
+A fractional delay filters interpolate the values between the current sample and the previous one. Different forms of interpolation have been proposed in the literature, as described in #laasko.
 
-### Doppler effect
+As an example, Lagrange interpolation is a commonly used technique, which in the first order case reduces to linear interpolation.
 
+Linear interpolation, or first-order interpolation, is implemented by connecting two known samples by a straight line and then reading the desired value from that line. This is given in the following equation:
+
+### Vibrato simulation
+
+Vibrato is defined as a small, quasi-periodic variation in the frequency of a tone. Traditionally, vibrato is not an audio effect but rather an embellishment  used by singers and instrumentalists. On the violin, for example, vibrato is produced by rhythmically swinging the finger back and forth on the fingerboard, slightly changing the length of the string. However, vibrato can be added to any audio signal through the use of modulated delay lines.
+Specifically, a quasi-periodic frequency shift can be accomplish using a modulated delay line. 
 
 
 #Chapter 6: Spatial sound
@@ -607,5 +674,6 @@ These small variations are obtained by modulating the original signal with time-
 means of frequency modulation. Journal of the Audio Engineering Society, 
 21(7):526–534, 1973.</div> 
 
+<div id="laasko"> T. Laasko et al., Splitting the Unit Delay [FIR/allpass filters design], IEEE Signal Processing Magazine, 13.1, 1996, pp. 30–60.</div>
  
       
